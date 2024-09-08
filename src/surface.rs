@@ -23,6 +23,43 @@ pub trait Surface {
         self.set_bg(x, y, cell.bg);
     }
 
+    fn fill_range_char(&mut self, xs: Range<usize>, ys: Range<usize>, chr: char) {
+        for y in ys {
+            for x in xs.clone() {
+                self.set_char(x, y, chr);
+            }
+        }
+    }
+
+    fn fill_range_fg(&mut self, xs: Range<usize>, ys: Range<usize>, fg: Colour) {
+        for y in ys {
+            for x in xs.clone() {
+                self.set_fg(x, y, fg);
+            }
+        }
+    }
+
+    fn fill_range_bg(&mut self, xs: Range<usize>, ys: Range<usize>, bg: Colour) {
+        for y in ys {
+            for x in xs.clone() {
+                self.set_bg(x, y, bg);
+            }
+        }
+    }
+
+    fn fill_range_char_and_fg(&mut self, xs: Range<usize>, ys: Range<usize>, chr: char, fg: Colour) {
+        self.fill_range_char(xs.clone(), ys.clone(), chr);
+        self.fill_range_fg(xs, ys, fg);
+    }
+
+    fn fill_range(&mut self, xs: Range<usize>, ys: Range<usize>, cell: Cell) {
+        for y in ys {
+            for x in xs.clone() {
+                self.set(x, y, cell);
+            }
+        }
+    }
+
     fn blit(&mut self, clip: &CellSurf, start_x: i32, start_y: i32) {
 
         let width = self.get_width() as i32;
@@ -69,64 +106,6 @@ pub trait Surface {
                     self.set_bg(c_x, c_y, copy_cell.bg);
                 }
             }
-        }
-    }
-}
-
-impl dyn Surface {
-
-    pub fn write_line<T: Into<String>>(&mut self, x: usize, y: usize, line: T) {
-
-        if y >= self.get_height() {
-            return;
-        }
-
-        let width = self.get_width();
-
-        for (idx, chr) in line.into().chars().enumerate() {
-
-            let cell_x = idx + x;
-
-            if cell_x >= width {
-                return
-            }
-
-            self.set_char(cell_x, y, chr);
-
-        }
-    }
-
-    // make i32 sometime
-    pub fn write_line_colour<T: Into<String>>(&mut self, x: usize, y: usize, line: T, fg: Colour, bg: Colour) {
-
-        if y >= self.get_height() {
-            return;
-        }
-
-        let width = self.get_width();
-
-        for (idx, chr) in line.into().chars().enumerate() {
-
-            let cell_x = idx + x;
-
-            if cell_x >= width {
-                return
-            }
-
-            self.set(cell_x, y, Cell::new(chr, fg, bg));
-
-        }
-    }
-
-    pub fn write_lines<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[T]) {
-        for (y_offset, line) in lines.iter().enumerate() {
-            self.write_line(x, y + y_offset, line.clone());
-        }
-    }
-
-    pub fn write_lines_colour<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[T], fg: Colour, bg: Colour) {
-        for (y_offset, line) in lines.iter().enumerate() {
-            self.write_line_colour(x, y + y_offset, line.clone(), fg, bg);
         }
     }
 }
@@ -179,6 +158,61 @@ impl ScreenSurface {
 
     pub fn get_raw_slices(&self) -> (&[u32], &[u32], &[u32]) {
         (&self.char_data, &self.fg_data, &self.bg_data)
+    }
+
+    fn write_line(&mut self, x: usize, y: usize, line: impl Into<String>) {
+
+        if y >= self.get_height() {
+            return;
+        }
+
+        let width = self.get_width();
+
+        for (idx, chr) in line.into().chars().enumerate() {
+
+            let cell_x = idx + x;
+
+            if cell_x >= width {
+                return
+            }
+
+            self.set_char(cell_x, y, chr);
+
+        }
+    }
+
+    // make i32 sometime
+    fn write_line_colour(&mut self, x: usize, y: usize, line: impl Into<String>, fg: Colour, bg: Colour) {
+
+        if y >= self.get_height() {
+            return;
+        }
+
+        let width = self.get_width();
+
+        for (idx, chr) in line.into().chars().enumerate() {
+
+            let cell_x = idx + x;
+
+            if cell_x >= width {
+                return
+            }
+
+            self.set(cell_x, y, Cell::new(chr, fg, bg));
+
+        }
+    }
+
+    fn write_lines(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone]) {
+        for (y_offset, line) in lines.iter().enumerate() {
+            self.write_line(x, y + y_offset, line.clone());
+        }
+    }
+
+    fn write_lines_colour<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone], fg: Colour, bg: Colour) {
+        for (y_offset, line) in lines.iter().enumerate() {
+            self.write_line_colour(x, y + y_offset, line.clone(), fg, bg);
+        }
     }
 }
 
@@ -349,6 +383,61 @@ impl CellSurf {
     fn get_idx(&self, x: usize, y: usize) -> usize {
         y * self.width + x
     }
+
+    fn write_line(&mut self, x: usize, y: usize, line: impl Into<String>) {
+
+        if y >= self.get_height() {
+            return;
+        }
+
+        let width = self.get_width();
+
+        for (idx, chr) in line.into().chars().enumerate() {
+
+            let cell_x = idx + x;
+
+            if cell_x >= width {
+                return
+            }
+
+            self.set_char(cell_x, y, chr);
+
+        }
+    }
+
+    // make i32 sometime
+    fn write_line_colour(&mut self, x: usize, y: usize, line: impl Into<String>, fg: Colour, bg: Colour) {
+
+        if y >= self.get_height() {
+            return;
+        }
+
+        let width = self.get_width();
+
+        for (idx, chr) in line.into().chars().enumerate() {
+
+            let cell_x = idx + x;
+
+            if cell_x >= width {
+                return
+            }
+
+            self.set(cell_x, y, Cell::new(chr, fg, bg));
+
+        }
+    }
+
+    fn write_lines(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone]) {
+        for (y_offset, line) in lines.iter().enumerate() {
+            self.write_line(x, y + y_offset, line.clone());
+        }
+    }
+
+    fn write_lines_colour<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone], fg: Colour, bg: Colour) {
+        for (y_offset, line) in lines.iter().enumerate() {
+            self.write_line_colour(x, y + y_offset, line.clone(), fg, bg);
+        }
+    }
 }
 pub struct SubSurface<'a> {
     x: usize,
@@ -452,6 +541,61 @@ impl<'a> SubSurface<'a> {
             for x in 0..self.width {
                 self.set_bg(x, y, bg);
             }
+        }
+    }
+
+    fn write_line(&mut self, x: usize, y: usize, line: impl Into<String>) {
+
+        if y >= self.get_height() {
+            return;
+        }
+
+        let width = self.get_width();
+
+        for (idx, chr) in line.into().chars().enumerate() {
+
+            let cell_x = idx + x;
+
+            if cell_x >= width {
+                return
+            }
+
+            self.set_char(cell_x, y, chr);
+
+        }
+    }
+
+    // make i32 sometime
+    fn write_line_colour(&mut self, x: usize, y: usize, line: impl Into<String>, fg: Colour, bg: Colour) {
+
+        if y >= self.get_height() {
+            return;
+        }
+
+        let width = self.get_width();
+
+        for (idx, chr) in line.into().chars().enumerate() {
+
+            let cell_x = idx + x;
+
+            if cell_x >= width {
+                return
+            }
+
+            self.set(cell_x, y, Cell::new(chr, fg, bg));
+
+        }
+    }
+
+    fn write_lines(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone]) {
+        for (y_offset, line) in lines.iter().enumerate() {
+            self.write_line(x, y + y_offset, line.clone());
+        }
+    }
+
+    fn write_lines_colour<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone], fg: Colour, bg: Colour) {
+        for (y_offset, line) in lines.iter().enumerate() {
+            self.write_line_colour(x, y + y_offset, line.clone(), fg, bg);
         }
     }
 }
