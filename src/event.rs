@@ -2,10 +2,10 @@ use glium::winit::keyboard::KeyCode as KC;
 use glium::winit::event::MouseButton as MB;
 
 #[derive(Clone)]
-pub struct FrameContext<'a> {
+pub struct FrameContext {
     pub dt_seconds: f32,
     pub mouse_pos: MousePosition,
-    pub held_keys: &'a [bool; NUM_KEYS],
+    pub held_keys: [bool; NUM_KEYS],
     pub screen_width: usize,
     pub screen_height: usize
 }
@@ -270,6 +270,6 @@ pub enum Event {
     KeyDown(Key),
     KeyRepeat(Key),
     KeyUp(Key),
-    MouseDown(MouseButton, MousePosition),
+    MouseDown(MouseButton),
     MouseUp(MouseButton)
 }

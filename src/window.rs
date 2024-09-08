@@ -41,33 +41,35 @@ pub fn load_code_page() -> [u32; 512] {
 }
 
 pub trait State {
-    fn handle_event(&mut self, event: Event) {}
-    fn tick(&mut self, context: FrameContext) {}
-    fn draw(&mut self, context: FrameContext, surface: &mut ScreenSurface) {}
+    fn handle_event(&mut self, event: Event, context: &FrameContext) {}
+    fn tick(&mut self, context: &FrameContext) {}
+    fn draw(&mut self, context: &FrameContext, surface: &mut ScreenSurface) {}
     fn close(&mut self) {}
 }
 
-pub struct WindowHandler<S: State> {
-    state: S,
+pub struct WindowHandler {
     screen_width: u32,
     screen_height: u32,
-    screen_cells_width: u32,
-    screen_cells_height: u32,
     surface: ScreenSurface,
-    target_fps: u64
+    target_fps: u64,
+    frame_context: FrameContext
 }
 
-impl<S: State> WindowHandler<S> {
+impl WindowHandler {
 
-    pub fn new(state: S) -> Self {
+    pub fn new() -> Self {
         Self {
-            state,
             screen_width: 0,
             screen_height: 0,
-            screen_cells_width: 0,
-            screen_cells_height: 0,
             surface: ScreenSurface::new(0, 0),
-            target_fps: 20
+            target_fps: 20,
+            frame_context: FrameContext {
+                dt_seconds: 0.0,
+                mouse_pos: MousePosition::new(),
+                held_keys: [false; NUM_KEYS],
+                screen_width: 0,
+                screen_height: 0
+            }
         }
     }
 
@@ -76,10 +78,10 @@ impl<S: State> WindowHandler<S> {
         self.screen_width = screen_width;
         self.screen_height = screen_height;
 
-        self.screen_cells_width = screen_width.div_ceil(CELL_WIDTH);
-        self.screen_cells_height = screen_height.div_ceil(CELL_HEIGHT);
+        self.frame_context.screen_width = screen_width.div_ceil(CELL_WIDTH) as usize;
+        self.frame_context.screen_height = screen_height.div_ceil(CELL_HEIGHT) as usize;
         
-        self.surface = ScreenSurface::new(self.screen_cells_width as usize, self.screen_cells_height as usize);
+        self.surface = ScreenSurface::new(self.frame_context.screen_width, self.frame_context.screen_height);
 
         self
 
@@ -90,7 +92,7 @@ impl<S: State> WindowHandler<S> {
         self
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self, mut state: impl State) {
 
         let event_loop = glium::winit::event_loop::EventLoop::builder()
         .build()
@@ -148,11 +150,7 @@ impl<S: State> WindowHandler<S> {
 
         let mut last_redraw = Instant::now();
         let mut next_redraw = Instant::now();
-
         let mut last_mouse_position = MousePosition::new();
-        let mut mouse_position = MousePosition::new();
-
-        let mut held_keys = [false; NUM_KEYS];
 
         #[allow(deprecated)]
         event_loop.run(move |ev, window_target| {
@@ -165,34 +163,34 @@ impl<S: State> WindowHandler<S> {
             match ev {
                 glium::winit::event::Event::WindowEvent { event, .. } => match event {
                     glium::winit::event::WindowEvent::CloseRequested => {
-                        self.state.close();
+                        state.close();
                         window_target.exit();
                     }
                     glium::winit::event::WindowEvent::CursorMoved { position, .. } => {
 
-                        mouse_position.pixel_x = position.x;
-                        mouse_position.pixel_y = position.y;
+                        self.frame_context.mouse_pos.pixel_x = position.x;
+                        self.frame_context.mouse_pos.pixel_y = position.y;
 
-                        mouse_position.pixel_x_rel = mouse_position.pixel_x - last_mouse_position.pixel_x;
-                        mouse_position.pixel_y_rel = mouse_position.pixel_y - last_mouse_position.pixel_y;
+                        self.frame_context.mouse_pos.pixel_x_rel = self.frame_context.mouse_pos.pixel_x - last_mouse_position.pixel_x;
+                        self.frame_context.mouse_pos.pixel_y_rel = self.frame_context.mouse_pos.pixel_y - last_mouse_position.pixel_y;
 
-                        mouse_position.cell_x = (position.x / CELL_WIDTH as f64) as i32;
-                        mouse_position.cell_y = (position.y / CELL_HEIGHT as f64) as i32;
+                        self.frame_context.mouse_pos.cell_x = (position.x / CELL_WIDTH as f64) as i32;
+                        self.frame_context.mouse_pos.cell_y = (position.y / CELL_HEIGHT as f64) as i32;
 
-                        mouse_position.cell_x_rel = mouse_position.cell_x - last_mouse_position.cell_x;
-                        mouse_position.cell_y_rel = mouse_position.cell_y - last_mouse_position.cell_y;
+                        self.frame_context.mouse_pos.cell_x_rel = self.frame_context.mouse_pos.cell_x - last_mouse_position.cell_x;
+                        self.frame_context.mouse_pos.cell_y_rel = self.frame_context.mouse_pos.cell_y - last_mouse_position.cell_y;
 
                     }
-                    glium::winit::event::WindowEvent::MouseInput { button: winit_button, state, .. } => {
+                    glium::winit::event::WindowEvent::MouseInput { button: winit_button, state: button_state, .. } => {
 
                         let button = MouseButton::from_winit(winit_button);
 
-                        let event = match state {
-                            glium::winit::event::ElementState::Pressed => Event::MouseDown(button, mouse_position.clone()),
+                        let event = match button_state {
+                            glium::winit::event::ElementState::Pressed => Event::MouseDown(button),
                             glium::winit::event::ElementState::Released => Event::MouseUp(button)
                         };
 
-                        self.state.handle_event(event);
+                        state.handle_event(event, &self.frame_context);
 
                     }
                     glium::winit::event::WindowEvent::KeyboardInput {event: key_event, ..} => {
@@ -209,16 +207,16 @@ impl<S: State> WindowHandler<S> {
                                 Event::KeyRepeat(key)
                             }
                             else {
-                                held_keys[key as usize] = true;
+                                self.frame_context.held_keys[key as usize] = true;
                                 Event::KeyDown(key)
                             },
                             glium::winit::event::ElementState::Released => {
-                                held_keys[key as usize] = false;
+                                self.frame_context.held_keys[key as usize] = false;
                                 Event::KeyUp(key)
                             }
                         };
 
-                        self.state.handle_event(event);
+                        state.handle_event(event, &self.frame_context);
 
                     }
                     glium::winit::event::WindowEvent::Resized(new_size) => {
@@ -226,29 +224,23 @@ impl<S: State> WindowHandler<S> {
                         self.screen_width = new_size.width;
                         self.screen_height = new_size.height;
 
-                        self.screen_cells_width = self.screen_width.div_ceil(CELL_WIDTH);
-                        self.screen_cells_height = self.screen_height.div_ceil(CELL_HEIGHT);
+                        self.frame_context.screen_width = self.screen_width.div_ceil(CELL_WIDTH) as usize;
+                        self.frame_context.screen_height = self.screen_height.div_ceil(CELL_HEIGHT) as usize;
 
-                        self.surface = ScreenSurface::new(self.screen_cells_width as usize, self.screen_cells_height as usize);
+                        self.surface = ScreenSurface::new(self.frame_context.screen_width, self.frame_context.screen_height);
 
                     }
                     glium::winit::event::WindowEvent::RedrawRequested => {
 
                         window_target.set_control_flow(glium::winit::event_loop::ControlFlow::wait_duration(Duration::from_millis(1000 / self.target_fps)));
 
-                        let frame_context = FrameContext {
-                            dt_seconds: (Instant::now() - last_redraw).as_secs_f32(),
-                            mouse_pos: mouse_position.clone(),
-                            held_keys: &held_keys,
-                            screen_width: self.screen_cells_width as usize,
-                            screen_height: self.screen_cells_height as usize
-                        };
+                        self.frame_context.dt_seconds = (Instant::now() - last_redraw).as_secs_f32();
 
                         last_redraw = Instant::now();
-                        last_mouse_position = mouse_position.clone();
-
-                        self.state.tick(frame_context.clone());
-                        self.state.draw(frame_context, &mut self.surface);
+                        last_mouse_position = self.frame_context.mouse_pos.clone();
+                        
+                        state.tick(&self.frame_context);
+                        state.draw(&self.frame_context, &mut self.surface);
         
                         let (cells_chars, cells_fgs, cells_bgs) = self.surface.get_raw_slices();
                         chars_texture = glium::texture::UnsignedTexture1d::new(&display, cells_chars).unwrap();
@@ -258,8 +250,8 @@ impl<S: State> WindowHandler<S> {
                         let uniforms = uniform! {
                             screenWidth: self.screen_width,
                             screenHeight: self.screen_height,
-                            screenCellsWidth: self.screen_cells_width,
-                            screenCellsHeight: self.screen_cells_height,
+                            screenCellsWidth: self.frame_context.screen_width as u32,
+                            screenCellsHeight: self.frame_context.screen_height as u32,
                             code_page: &code_page_texture,
                             chars: glium::uniforms::Sampler(&chars_texture, cells_sample_behavior),
                             fgs: glium::uniforms::Sampler(&fgs_texture, cells_sample_behavior),
