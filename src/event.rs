@@ -10,6 +10,12 @@ pub struct FrameContext {
     pub screen_height: usize
 }
 
+impl FrameContext {
+    pub fn key_held(&self, key: Key) -> bool {
+        self.held_keys[key as usize]
+    }
+}
+
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq)]
 pub enum Key {
