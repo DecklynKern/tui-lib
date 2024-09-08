@@ -152,6 +152,8 @@ impl<S: State> WindowHandler<S> {
         let mut last_mouse_position = MousePosition::new();
         let mut mouse_position = MousePosition::new();
 
+        let mut held_keys = [false; NUM_KEYS];
+
         #[allow(deprecated)]
         event_loop.run(move |ev, window_target| {
 
@@ -207,9 +209,13 @@ impl<S: State> WindowHandler<S> {
                                 Event::KeyRepeat(key)
                             }
                             else {
+                                held_keys[key as usize] = true;
                                 Event::KeyDown(key)
                             },
-                            glium::winit::event::ElementState::Released => Event::KeyUp(key)
+                            glium::winit::event::ElementState::Released => {
+                                held_keys[key as usize] = false;
+                                Event::KeyUp(key)
+                            }
                         };
 
                         self.state.handle_event(event);
@@ -233,6 +239,7 @@ impl<S: State> WindowHandler<S> {
                         let frame_context = FrameContext {
                             dt_seconds: (Instant::now() - last_redraw).as_secs_f32(),
                             mouse_pos: mouse_position.clone(),
+                            held_keys: &held_keys,
                             screen_width: self.screen_cells_width as usize,
                             screen_height: self.screen_cells_height as usize
                         };
