@@ -315,6 +315,37 @@ impl CellSurf {
         }
     }
 
+    pub fn from_file<P: Into<std::path::PathBuf>>(path: P) -> Option<Self> {
+    
+        let file_result = std::fs::File::open(path.into().to_str().unwrap());
+    
+        match file_result {
+            Ok(mut file) => {
+    
+                let layer = &rexpaint::XpFile::read(&mut file).unwrap().layers[0];
+    
+                let mut surf = CellSurf::new(layer.width, layer.height);
+    
+                for y in 0..layer.height {
+                    for x in 0..layer.width {
+    
+                        let cell = layer.cells[y + layer.height * x];
+                        
+                        surf.set(x, y, Cell::new(
+                            codepage_437::CP437_WINGDINGS.decode(cell.ch as u8),
+                            cell.fg.into(),
+                            cell.bg.into()
+                        ));
+                    }
+                }
+    
+                Some(surf)
+    
+            },
+            Err(_) => None
+        }
+    }
+
     fn get_idx(&self, x: usize, y: usize) -> usize {
         y * self.width + x
     }

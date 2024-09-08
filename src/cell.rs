@@ -463,6 +463,30 @@ impl Colour {
     }
 }
 
+impl From<rexpaint::XpColor> for Colour {
+    fn from(xp_colour: rexpaint::XpColor) -> Colour {
+        match (xp_colour.r, xp_colour.g, xp_colour.b) {
+            (  0,   0,   0) => BLACK,
+            (  0,   0, 128) => DARK_BLUE,
+            (  0, 128,   0) => DARK_GREEN,
+            (  0, 128, 128) => DARK_CYAN,
+            (128,   0,   0) => DARK_RED,
+            (128,   0, 128) => DARK_MAGENTA,
+            (128, 128,   0) => DARK_YELLOW,
+            (192, 192, 192) => GREY,
+            (128, 128, 128) => GREY,
+            (  0,   0, 255) => BLUE,
+            (  0, 255,   0) => GREY,
+            (  0, 255, 255) => CYAN,
+            (255,   0,   0) => RED,
+            (255,   0, 255) => MAGENTA,
+            (255, 255,   0) => YELLOW,
+            (255, 255, 255) => WHITE,
+            _ => TRANSPARENT
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 pub struct Cell {
     pub chr: char,
