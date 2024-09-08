@@ -1,6 +1,6 @@
-use super::definitions::*;
+use super::cell::*;
 
-const RGB_TO_COLOUR: &'static [u8] = include_bytes!("rgbtocolour.txt");
+const RGB_TO_COLOUR: &[u8] = include_bytes!("rgbtocolour.txt");
 
 pub fn rgb_to_cell(r: u8, g: u8, b: u8) -> Cell {
 

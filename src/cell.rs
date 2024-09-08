@@ -1,4 +1,4 @@
-pub const CODE_PAGE_STRING: &'static str = 
+pub const CODE_PAGE_STRING: &str = 
 " ☺☻♥♦♣♠•◘○◙♂♀♪♫☼\
 ►◄↕‼¶§▬↨↑↓→←∟↔▲\
 ▼ !\"#$%&'()*+,-./\

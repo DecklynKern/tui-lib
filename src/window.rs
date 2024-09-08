@@ -1,5 +1,5 @@
 use super::surface::*;
-use super::frame::*;
+use super::event::*;
 
 use std::time::*;
 use glium::Surface;
@@ -7,8 +7,8 @@ use glium::Surface;
 const CELL_WIDTH: u32 = 8;
 const CELL_HEIGHT: u32 = 8;
 
-const VERTEX_SHADER: &'static str = include_str!("shaders/vertex.glsl");
-const FRAGMENT_SHADER: &'static str = include_str!("shaders/frag.glsl");
+const VERTEX_SHADER: &str = include_str!("shaders/vertex.glsl");
+const FRAGMENT_SHADER: &str = include_str!("shaders/frag.glsl");
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -258,7 +258,7 @@ impl<S: State> WindowHandler<S> {
                         };
 
                         let mut target = display.draw();
-                        target.draw(&vertex_buffer, &indices, &program, &uniforms,
+                        target.draw(&vertex_buffer, indices, &program, &uniforms,
                             &draw_params).unwrap();
                         target.finish().unwrap();
 

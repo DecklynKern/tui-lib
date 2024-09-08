@@ -1,8 +1,8 @@
-use super::definitions::*;
+use super::cell::*;
 
-use std::ops::Range;
+use std::{ops::Range, rc::Rc};
 
-pub trait CellSurface {
+pub trait Surface {
     fn get_width(&self) -> usize;
     fn get_height(&self) -> usize;
     fn get_char(&self, x: usize, y: usize) -> char;
@@ -23,7 +23,7 @@ pub trait CellSurface {
         self.set_bg(x, y, cell.bg);
     }
 
-    fn blit(&mut self, clip: &SimpleSurface, start_x: usize, start_y: usize) {
+    fn blit(&mut self, clip: &CellSurf, start_x: usize, start_y: usize) {
 
         let width = self.get_width() as i32;
         let height = self.get_height() as i32;
@@ -73,7 +73,7 @@ pub trait CellSurface {
     }
 }
 
-impl dyn CellSurface {
+impl dyn Surface {
 
     pub fn write_line<T: Into<String>>(&mut self, x: usize, y: usize, line: T) {
 
@@ -182,7 +182,7 @@ impl ScreenSurface {
     }
 }
 
-impl CellSurface for ScreenSurface {
+impl Surface for ScreenSurface {
 
     fn get_width(&self) -> usize {
         self.width
@@ -256,13 +256,13 @@ impl CellSurface for ScreenSurface {
 }
 
 #[derive(Clone)]
-pub struct SimpleSurface {
+pub struct CellSurf {
     pub width: usize,
     pub height: usize,
     cells: Box<[Cell]>
 }
 
-impl CellSurface for SimpleSurface {
+impl Surface for CellSurf {
     
     fn get_width(&self) -> usize {
         self.width
@@ -301,7 +301,7 @@ impl CellSurface for SimpleSurface {
     }
 }
 
-impl SimpleSurface {
+impl CellSurf {
 
     pub fn new(width: usize, height: usize) -> Self {
         Self::filled_with(width, height, Cell::transparent())
@@ -324,10 +324,10 @@ pub struct SubSurface<'a> {
     y: usize,
     pub width: usize,
     pub height: usize,
-    parent_surf: &'a mut dyn CellSurface
+    parent_surf: &'a mut dyn Surface
 }
 
-impl<'a> CellSurface for SubSurface<'a> {
+impl<'a> Surface for SubSurface<'a> {
 
     fn get_width(&self) -> usize {
         self.width
@@ -421,6 +421,74 @@ impl<'a> SubSurface<'a> {
             for x in 0..self.width {
                 self.set_bg(x, y, bg);
             }
+        }
+    }
+}
+
+pub struct Animation {
+    pub surfaces: Vec<Rc<CellSurf>>,
+    pub durations: Vec<u64>,
+    pub total_duration: u64,
+    pub timer: u64
+}
+
+impl Animation {
+    
+    pub fn new(surfaces: Vec<Rc<CellSurf>>, durations: Vec<u64>) -> Self {
+        Self{
+            surfaces,
+            total_duration: durations.iter().sum(),
+            durations,
+            timer: 0
+        }
+    }
+
+    pub fn from_surface(surface: Rc<CellSurf>) -> Self {
+        Self{
+            surfaces: vec![surface],
+            durations: vec![1000],
+            total_duration: 1000,
+            timer: 0
+        }
+    }
+
+    pub fn from_raw_surface(surface: CellSurf) -> Self {
+        Self::from_surface(Rc::new(surface))
+    }
+
+    pub fn update(&mut self, dt: u64) {
+        self.timer += dt;
+        self.timer %= self.total_duration;
+    }
+    
+    pub fn get_surf(&self) -> &CellSurf {
+
+        let mut t = self.timer;
+
+        for (surf, duration) in self.surfaces.iter().zip(&self.durations) {
+
+            if *duration > t {
+                return surf;
+            }
+
+            t -= duration;
+
+        }
+
+        // *should* not happen
+        &self.surfaces[0]
+
+    }
+}
+
+#[macro_export]
+macro_rules! anim {
+    ($c: expr, $($n: expr, $d: expr),+) => {
+        {
+            Animation::new(
+                vec![$($c.get_surf_rc($n)),+],
+                vec![$($d),+],
+            )
         }
     }
 }
