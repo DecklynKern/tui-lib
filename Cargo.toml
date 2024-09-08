@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 glium = "0.35"
 image = "0.25.2"
+rand = "0.8.5"
