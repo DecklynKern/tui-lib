@@ -160,7 +160,7 @@ impl ScreenSurface {
         (&self.char_data, &self.fg_data, &self.bg_data)
     }
 
-    fn write_line(&mut self, x: usize, y: usize, line: impl Into<String>) {
+    pub fn write_line(&mut self, x: usize, y: usize, line: impl Into<String>) {
 
         if y >= self.get_height() {
             return;
@@ -182,7 +182,7 @@ impl ScreenSurface {
     }
 
     // make i32 sometime
-    fn write_line_colour(&mut self, x: usize, y: usize, line: impl Into<String>, fg: Colour, bg: Colour) {
+    pub fn write_line_colour(&mut self, x: usize, y: usize, line: impl Into<String>, fg: Colour, bg: Colour) {
 
         if y >= self.get_height() {
             return;
@@ -203,13 +203,13 @@ impl ScreenSurface {
         }
     }
 
-    fn write_lines(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone]) {
+    pub fn write_lines(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone]) {
         for (y_offset, line) in lines.iter().enumerate() {
             self.write_line(x, y + y_offset, line.clone());
         }
     }
 
-    fn write_lines_colour<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone], fg: Colour, bg: Colour) {
+    pub fn write_lines_colour<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone], fg: Colour, bg: Colour) {
         for (y_offset, line) in lines.iter().enumerate() {
             self.write_line_colour(x, y + y_offset, line.clone(), fg, bg);
         }
@@ -384,7 +384,7 @@ impl CellSurf {
         y * self.width + x
     }
 
-    fn write_line(&mut self, x: usize, y: usize, line: impl Into<String>) {
+    pub fn write_line(&mut self, x: usize, y: usize, line: impl Into<String>) {
 
         if y >= self.get_height() {
             return;
@@ -406,7 +406,7 @@ impl CellSurf {
     }
 
     // make i32 sometime
-    fn write_line_colour(&mut self, x: usize, y: usize, line: impl Into<String>, fg: Colour, bg: Colour) {
+    pub fn write_line_colour(&mut self, x: usize, y: usize, line: impl Into<String>, fg: Colour, bg: Colour) {
 
         if y >= self.get_height() {
             return;
@@ -427,13 +427,13 @@ impl CellSurf {
         }
     }
 
-    fn write_lines(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone]) {
+    pub fn write_lines(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone]) {
         for (y_offset, line) in lines.iter().enumerate() {
             self.write_line(x, y + y_offset, line.clone());
         }
     }
 
-    fn write_lines_colour<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone], fg: Colour, bg: Colour) {
+    pub fn write_lines_colour<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone], fg: Colour, bg: Colour) {
         for (y_offset, line) in lines.iter().enumerate() {
             self.write_line_colour(x, y + y_offset, line.clone(), fg, bg);
         }
@@ -544,7 +544,7 @@ impl<'a> SubSurface<'a> {
         }
     }
 
-    fn write_line(&mut self, x: usize, y: usize, line: impl Into<String>) {
+    pub fn write_line(&mut self, x: usize, y: usize, line: impl Into<String>) {
 
         if y >= self.get_height() {
             return;
@@ -566,7 +566,7 @@ impl<'a> SubSurface<'a> {
     }
 
     // make i32 sometime
-    fn write_line_colour(&mut self, x: usize, y: usize, line: impl Into<String>, fg: Colour, bg: Colour) {
+    pub fn write_line_colour(&mut self, x: usize, y: usize, line: impl Into<String>, fg: Colour, bg: Colour) {
 
         if y >= self.get_height() {
             return;
@@ -587,13 +587,13 @@ impl<'a> SubSurface<'a> {
         }
     }
 
-    fn write_lines(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone]) {
+    pub fn write_lines(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone]) {
         for (y_offset, line) in lines.iter().enumerate() {
             self.write_line(x, y + y_offset, line.clone());
         }
     }
 
-    fn write_lines_colour<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone], fg: Colour, bg: Colour) {
+    pub fn write_lines_colour<T: Into<String> + Clone>(&mut self, x: usize, y: usize, lines: &[impl Into<String> + Clone], fg: Colour, bg: Colour) {
         for (y_offset, line) in lines.iter().enumerate() {
             self.write_line_colour(x, y + y_offset, line.clone(), fg, bg);
         }
