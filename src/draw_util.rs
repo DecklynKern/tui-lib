@@ -1,4 +1,5 @@
 use super::cell::*;
+use super::math::*;
 
 const RGB_TO_COLOUR: &[u8] = include_bytes!("rgbtocolour.txt");
 
@@ -13,47 +14,72 @@ pub fn rgb_to_cell(r: u8, g: u8, b: u8) -> Cell {
     )
 }
 
-// pub fn pixel_line((start, end): Line<i32>) -> Vec<Point<i32>> {
-//     bterm::line2d_bresenham(
-//         bterm::Point::from_tuple(start),
-//         bterm::Point::from_tuple(end)
-//     ).iter().map(
-//         |point| (point.x, point.y)
-//     ).collect()
-// }
+pub fn pixel_line((mut start, mut end): Line<i32>) -> Vec<Point<i32>> {
 
-// pub fn pixel_line_filtered(line: Line<i32>, x_cutoff: usize, y_cutoff: usize) -> Vec<Point<usize>> {
-//     pixel_line(line).iter().map(
-//         |(x, y)| (*x as usize, *y as usize)
-//     ).filter(
-//         |(x, y)| *x < x_cutoff && *y < y_cutoff
-//     ).collect()
-// }
+    if start.0 > end.0 {
+        std::mem::swap(&mut start, &mut end);
+    }
 
-// pub fn pixel_circle((centre, radius): Circle<i32>) -> Vec<Point<i32>> {
-//     bterm::BresenhamCircle::new(
-//         bterm::Point::from_tuple(centre),
-//         radius
-//     ).map(
-//         |point| (point.x, point.y)
-//     ).collect()
-// }
+    let dir = if start.1 > end.1 {
+        -1
+    }
+    else {
+        1
+    };
 
-// pub fn pixel_circle_filled(circle: Circle<i32>) -> Vec<Point<i32>> {
+    let x_diff = end.0 - start.0;
+    let y_diff = (start.1 - end.1).abs();
+    let x_main_axis = x_diff > y_diff;
+
+    let mut points = Vec::with_capacity(x_diff.max(y_diff) as usize);
+    let (mut x, mut y) = start;
+
+    while (x, y) != end {
+
+        let flat_point = if x_main_axis {
+            (x + 1, y)
+        }
+        else {
+            (x, y + dir)
+        };
+
+        let diagonal_point = (x + 1, y + dir);
+
+        todo!("finish pixel line");
+
+    }
+
+    points
+
+}
+
+pub fn pixel_line_filtered(line: Line<i32>, x_cutoff: usize, y_cutoff: usize) -> Vec<Point<usize>> {
+    pixel_line(line).iter().map(
+        |(x, y)| (*x as usize, *y as usize)
+    ).filter(
+        |(x, y)| *x < x_cutoff && *y < y_cutoff
+    ).collect()
+}
+
+pub fn pixel_circle((centre, radius): Circle<i32>) -> Vec<Point<i32>> {
+    todo!("finish pixel circle");
+}
+
+pub fn pixel_circle_filled(circle: Circle<i32>) -> Vec<Point<i32>> {
     
-//     let mut final_pixels = Vec::new();
-//     let centre_x = circle.0.0;
+    let mut final_pixels = Vec::new();
+    let centre_x = circle.0.0;
 
-//     for (x, y) in pixel_circle(circle) {
+    for (x, y) in pixel_circle(circle) {
 
-//         if x <= centre_x {
+        if x <= centre_x {
 
-//             for fill_x in x..(2 * centre_x - x + 1) {
-//                 final_pixels.push((fill_x, y));
-//             }
-//         }
-//     }
+            for fill_x in x..(2 * centre_x - x + 1) {
+                final_pixels.push((fill_x, y));
+            }
+        }
+    }
 
-//     final_pixels
+    final_pixels
 
-// }
+}

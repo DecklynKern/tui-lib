@@ -4,7 +4,9 @@ use glium::winit::event::MouseButton as MB;
 #[derive(Clone)]
 pub struct FrameContext {
     pub dt_seconds: f32,
-    pub mouse_pos: MousePosition
+    pub mouse_pos: MousePosition,
+    pub screen_width: usize,
+    pub screen_height: usize
 }
 
 #[derive(Clone, Copy, PartialEq)]

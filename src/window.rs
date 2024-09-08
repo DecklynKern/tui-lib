@@ -232,7 +232,9 @@ impl<S: State> WindowHandler<S> {
 
                         let frame_context = FrameContext {
                             dt_seconds: (Instant::now() - last_redraw).as_secs_f32(),
-                            mouse_pos: mouse_position.clone()
+                            mouse_pos: mouse_position.clone(),
+                            screen_width: self.screen_cells_width as usize,
+                            screen_height: self.screen_cells_height as usize
                         };
 
                         last_redraw = Instant::now();
