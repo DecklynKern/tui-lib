@@ -4,3 +4,6 @@ pub mod frame;
 pub mod rand;
 pub mod surface;
 pub mod window;
+
+#[macro_use]
+extern crate glium;
