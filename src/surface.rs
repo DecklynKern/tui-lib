@@ -23,7 +23,7 @@ pub trait Surface {
         self.set_bg(x, y, cell.bg);
     }
 
-    fn blit(&mut self, clip: &CellSurf, start_x: usize, start_y: usize) {
+    fn blit(&mut self, clip: &CellSurf, start_x: i32, start_y: i32) {
 
         let width = self.get_width() as i32;
         let height = self.get_height() as i32;
