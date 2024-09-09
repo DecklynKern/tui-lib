@@ -34,6 +34,7 @@ pub const MIDDLE_BLOCK: char = '■';
 pub const MIDDLE_BLOCK_OUTLINE: char = '□';
 
 pub const SINGLE_PIPE: [char; 11] = ['│', '─', '└', '┌', '┐', '┘', '┴', '├', '┬', '┤', '┼'];
+pub const DASHED_SINGLE_PIPE: [char; 11] = ['|', '-', '└', '┌', '┐', '┘', '┴', '├', '┬', '┤', '+'];
 pub const DOUBLE_PIPE: [char; 11] = ['║', '═', '╚', '╔', '╗', '╝', '╩', '╠', '╦', '╣', '╬'];
 
 pub const PIPE_UD: usize = 0;
@@ -47,6 +48,13 @@ pub const PIPE_URD: usize = 7;
 pub const PIPE_LRD: usize = 8;
 pub const PIPE_ULD: usize = 9;
 pub const PIPE_ULRD: usize = 10;
+
+pub fn pipe_idx_from_dirs(left: bool, right: bool, up: bool, down: bool) -> usize {
+    8 * left as usize +
+    4 * right as usize +
+    2 * up as usize + 
+    down as usize
+}
 
 pub fn char_to_code_point(chr: char) -> u8 {
     match chr {

@@ -68,6 +68,7 @@ pub enum Key {
     Tab,
     LBracket,
     RBracket,
+    LCtrl,
     LAlt,
     RAlt,
     Unknown
@@ -126,6 +127,7 @@ impl Key {
             KC::Tab => Self::Tab,
             KC::BracketLeft => Self::LBracket,
             KC::BracketRight => Self::RBracket,
+            KC::ControlLeft => Self::LCtrl,
             KC::AltLeft => Self::LAlt,
             KC::AltRight => Self::RAlt,
             _ => Self::Unknown
