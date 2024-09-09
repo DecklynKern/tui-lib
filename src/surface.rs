@@ -655,15 +655,3 @@ impl Animation {
 
     }
 }
-
-#[macro_export]
-macro_rules! anim {
-    ($c: expr, $($n: expr, $d: expr),+) => {
-        {
-            Animation::new(
-                vec![$($c.get_surf_rc($n)),+],
-                vec![$($d),+],
-            )
-        }
-    }
-}
