@@ -11,7 +11,11 @@ T: ops::Rem<Output = T> {
 pub fn rand_roll<T>(odds: T) -> bool
 where rand::distributions::Standard: rand::distributions::Distribution<T>,
 T: ops::Rem<Output = T> + cmp::PartialOrd<u64> {
-    rand_range(odds) > 1 
+    rand_range(odds) > 1
+}
+
+pub fn rand_prob(prob: f32) -> bool {
+    rand_range(1.0) < prob
 }
 
 pub fn rand_elem<T>(arr: &[T]) -> &T 
