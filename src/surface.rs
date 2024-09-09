@@ -439,7 +439,7 @@ impl CellSurf {
         }
     }
 }
-pub struct SubSurface<'a> {
+pub struct Subsurface<'a> {
     x: usize,
     y: usize,
     pub width: usize,
@@ -447,7 +447,7 @@ pub struct SubSurface<'a> {
     parent_surf: &'a mut dyn Surface
 }
 
-impl<'a> Surface for SubSurface<'a> {
+impl<'a> Surface for Subsurface<'a> {
 
     fn get_width(&self) -> usize {
         self.width
@@ -498,7 +498,7 @@ impl<'a> Surface for SubSurface<'a> {
     }
 }
 
-impl<'a> SubSurface<'a> {
+impl<'a> Subsurface<'a> {
 
     pub fn fill_range_chr(&mut self, xs: Range<usize>, ys: Range<usize>, chr: char) {
         todo!()
