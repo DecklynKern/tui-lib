@@ -5,7 +5,7 @@ use crate::core::event::*;
 use super::Frame;
 
 pub trait Model: Sized {
-    fn build(&mut self, _: Frame<Self>) {
+    fn build(&mut self, _: &mut Frame<Self>) {
     }
     fn quit(&mut self) -> Option<Box<dyn Any>> {
         None

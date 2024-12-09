@@ -1,8 +1,11 @@
+use super::surface::Surface;
 use super::surface::*;
 use super::event::*;
 
+use crate::gui::{Frame, Model, Widget};
+
 use std::time::*;
-use glium::Surface;
+use glium::Surface as gliumSurface;
 
 const CELL_WIDTH: u32 = 8;
 const CELL_HEIGHT: u32 = 8;
@@ -49,6 +52,41 @@ pub trait State {
 
 pub struct EmptyState {}
 impl State for EmptyState {}
+
+struct GUIState<M: Model + 'static> {
+    model: M,
+    frame: Frame<M>
+}
+
+impl<M: Model> State for GUIState<M> {
+
+    fn handle_event(&mut self, _event: Event, _context: &FrameContext) {
+        todo!()
+    }
+
+    fn tick(&mut self, context: &FrameContext) {
+        self.frame.update(&mut self.model, context);
+    }
+
+    fn draw(&mut self, context: &FrameContext, surf: &mut ScreenSurface) {
+        self.frame.render(context, surf.get_sub_surface(0, 0, surf.width, surf.height));
+    }
+}
+
+impl<M: Model> GUIState<M> {
+
+    pub fn new(mut model: M) -> Self {
+
+        let mut frame = Frame::new();
+
+        model.build(&mut frame);
+
+        Self {
+            model,
+            frame
+        }
+    }
+}
 
 pub struct WindowHandler {
     screen_width: u32,
