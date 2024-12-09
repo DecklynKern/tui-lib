@@ -47,6 +47,9 @@ pub trait State {
     fn close(&mut self) {}
 }
 
+pub struct EmptyState {}
+impl State for EmptyState {}
+
 pub struct WindowHandler {
     screen_width: u32,
     screen_height: u32,
