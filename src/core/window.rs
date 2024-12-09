@@ -1,7 +1,11 @@
+use super::event;
 use super::surface::Surface;
 use super::surface::*;
 use super::event::*;
 
+use crate::gui::KeyCallback;
+use crate::gui::MouseCallback;
+use crate::gui::SimpleCallback;
 use crate::gui::{Frame, Model, Widget};
 
 use std::time::*;
@@ -53,15 +57,34 @@ pub trait State {
 pub struct EmptyState {}
 impl State for EmptyState {}
 
-struct GUIState<M: Model + 'static> {
+pub struct GUIState<M: Model + 'static> {
     model: M,
     frame: Frame<M>
 }
 
 impl<M: Model> State for GUIState<M> {
 
-    fn handle_event(&mut self, _event: Event, _context: &FrameContext) {
-        todo!()
+    fn handle_event(&mut self, event: Event, context: &FrameContext) {
+        
+        match event {
+            Event::MouseDown(MouseButton::Left) => {
+                let response = self.frame.handle_left_click(context.mouse_pos.cell_x, context.mouse_pos.cell_y);
+                self.handle_mouse_callback(response);
+            }
+            Event::MouseUp(MouseButton::Left) => {
+                let response = self.frame.handle_left_click_release();
+                self.handle_simple_callback(response);
+            }
+            Event::MouseDown(MouseButton::Right) => {
+                let response = self.frame.handle_right_click(context.mouse_pos.cell_x, context.mouse_pos.cell_y);
+                self.handle_mouse_callback(response);
+            }
+            Event::KeyDown(key) | Event::KeyRepeat(key) => {
+                let response = self.frame.handle_key_press(key);
+                self.handle_key_callback(response, key);
+            }
+            _ => {} // lol
+        }
     }
 
     fn tick(&mut self, context: &FrameContext) {
@@ -84,6 +107,24 @@ impl<M: Model> GUIState<M> {
         Self {
             model,
             frame
+        }
+    }
+
+    fn handle_simple_callback(&mut self, callback: Option<SimpleCallback<M>>) {
+        if let Some(callback_func) = callback {
+            callback_func.call(&mut self.model, ());
+        }
+    }
+
+    fn handle_mouse_callback(&mut self, callback: Option<(MouseCallback<M>, (i32, i32))>) {
+        if let Some((callback_func, pos)) = callback {
+            callback_func.call(&mut self.model, pos);
+        }
+    }
+
+    fn handle_key_callback(&mut self, callback: Option<KeyCallback<M>>, key: Key) {
+        if let Some(callback_func) = callback {
+            callback_func.call(&mut self.model, key);
         }
     }
 }
