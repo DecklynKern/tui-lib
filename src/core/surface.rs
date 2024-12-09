@@ -558,23 +558,44 @@ impl<'a> Surface for SubSurface<'a> {
 impl<'a> SubSurface<'a> {
 
     pub fn fill_range_chr(&mut self, xs: Range<usize>, ys: Range<usize>, chr: char) {
-        todo!()
+        for y in ys {
+            for x in xs.clone() {
+                self.set_char(x, y, chr);
+            }
+        }
     }
 
     pub fn fill_range_fg(&mut self, xs: Range<usize>, ys: Range<usize>, fg: Colour) {
-        todo!()
+        for y in ys {
+            for x in xs.clone() {
+                self.set_fg(x, y, fg);
+            }
+        }
     }
 
     pub fn fill_range_bg(&mut self, xs: Range<usize>, ys: Range<usize>, bg: Colour) {
-        todo!()
+        for y in ys {
+            for x in xs.clone() {
+                self.set_bg(x, y, bg);
+            }
+        }
     }
 
     pub fn fill_range_chr_and_fg(&mut self, xs: Range<usize>, ys: Range<usize>, chr: char, fg: Colour) {
-        todo!()
+        for y in ys {
+            for x in xs.clone() {
+                self.set_char(x, y, chr);
+                self.set_fg(x, y, fg);
+            }
+        }
     }
 
     pub fn fill_range(&mut self, xs: Range<usize>, ys: Range<usize>, cell: Cell) {
-        todo!()
+        for y in ys {
+            for x in xs.clone() {
+                self.set(x, y, cell);
+            }
+        }
     }
 
     pub fn fill_char(&mut self, chr: char) {
