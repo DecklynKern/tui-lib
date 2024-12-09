@@ -14,6 +14,16 @@ impl FrameContext {
     pub fn key_held(&self, key: Key) -> bool {
         self.held_keys[key as usize]
     }
+
+    pub fn with_mouse_offset(&self, offset_x: i32, offset_y: i32) -> Self {
+        Self {
+            dt_seconds: self.dt_seconds,
+            mouse_pos: self.mouse_pos.with_cell_offset(offset_x, offset_y),
+            held_keys: self.held_keys,
+            screen_width: self.screen_width,
+            screen_height: self.screen_height
+        }
+    }
 }
 
 #[repr(C)]

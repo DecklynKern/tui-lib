@@ -1,10 +1,7 @@
-pub mod cell;
-pub mod draw_util;
-pub mod event;
-pub mod math;
-pub mod rand;
-pub mod surface;
-pub mod window;
+pub mod core;
+pub mod gui;
+
+use crate::core::*;
 
 #[macro_use]
 extern crate glium;

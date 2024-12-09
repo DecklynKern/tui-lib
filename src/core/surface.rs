@@ -23,6 +23,30 @@ pub trait Surface {
         self.set_bg(x, y, cell.bg);
     }
 
+    fn fill_char(&mut self, chr: char) {
+        for y in 0..self.get_height() {
+            for x in 0..self.get_width() {
+                self.set_char(x, y, chr);
+            }
+        }
+    }
+
+    fn fill_fg(&mut self, fg: Colour) {
+        for y in 0..self.get_height() {
+            for x in 0..self.get_width() {
+                self.set_fg(x, y, fg);
+            }
+        }
+    }
+
+    fn fill_bg(&mut self, bg: Colour) {
+        for y in 0..self.get_height() {
+            for x in 0..self.get_width() {
+                self.set_bg(x, y, bg);
+            }
+        }
+    }
+
     fn fill_range_char(&mut self, xs: Range<usize>, ys: Range<usize>, chr: char) {
         for y in ys {
             for x in xs.clone() {
@@ -108,6 +132,8 @@ pub trait Surface {
             }
         }
     }
+
+    fn get_sub_surface(&mut self, x: usize, y: usize, width: usize, height: usize) -> SubSurface;
 }
 
 #[derive(Clone)]
@@ -287,6 +313,16 @@ impl Surface for ScreenSurface {
         self.bg_data.fill(bg_pack);
 
     }
+
+    fn get_sub_surface(&mut self, x: usize, y: usize, width: usize, height: usize) -> SubSurface {
+        SubSurface {
+            x,
+            y,
+            width,
+            height,
+            parent_surf: self
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -332,6 +368,16 @@ impl Surface for CellSurf {
 
     fn fill(&mut self, cell: Cell) {
         self.cells = vec![cell; self.width * self.height].into_boxed_slice();
+    }
+
+    fn get_sub_surface(&mut self, x: usize, y: usize, width: usize, height: usize) -> SubSurface {
+        SubSurface {
+            x,
+            y,
+            width,
+            height,
+            parent_surf: self
+        }
     }
 }
 
@@ -439,7 +485,8 @@ impl CellSurf {
         }
     }
 }
-pub struct Subsurface<'a> {
+
+pub struct SubSurface<'a> {
     x: usize,
     y: usize,
     pub width: usize,
@@ -447,7 +494,7 @@ pub struct Subsurface<'a> {
     parent_surf: &'a mut dyn Surface
 }
 
-impl<'a> Surface for Subsurface<'a> {
+impl<'a> Surface for SubSurface<'a> {
 
     fn get_width(&self) -> usize {
         self.width
@@ -496,9 +543,19 @@ impl<'a> Surface for Subsurface<'a> {
             }
         }
     }
+
+    fn get_sub_surface(&mut self, x: usize, y: usize, width: usize, height: usize) -> SubSurface {
+        SubSurface {
+            x: self.x + x,
+            y: self.y + y,
+            width,
+            height,
+            parent_surf: self.parent_surf
+        }
+    }
 }
 
-impl<'a> Subsurface<'a> {
+impl<'a> SubSurface<'a> {
 
     pub fn fill_range_chr(&mut self, xs: Range<usize>, ys: Range<usize>, chr: char) {
         todo!()
@@ -520,7 +577,7 @@ impl<'a> Subsurface<'a> {
         todo!()
     }
 
-    pub fn fill_chr(&mut self, chr: char) {
+    pub fn fill_char(&mut self, chr: char) {
         for y in 0..self.height {
             for x in 0..self.width {
                 self.set_char(x, y, chr);

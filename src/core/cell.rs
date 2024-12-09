@@ -33,9 +33,10 @@ pub const THREE_QUARTERS_SHADED_BLOCK: char = '▓';
 pub const MIDDLE_BLOCK: char = '■';
 pub const MIDDLE_BLOCK_OUTLINE: char = '□';
 
-pub const SINGLE_PIPE: [char; 11] = ['│', '─', '└', '┌', '┐', '┘', '┴', '├', '┬', '┤', '┼'];
-pub const DASHED_SINGLE_PIPE: [char; 11] = ['|', '-', '└', '┌', '┐', '┘', '┴', '├', '┬', '┤', '+'];
-pub const DOUBLE_PIPE: [char; 11] = ['║', '═', '╚', '╔', '╗', '╝', '╩', '╠', '╦', '╣', '╬'];
+pub type Pipe = [char; 11];
+pub const SINGLE_PIPE: Pipe = ['│', '─', '└', '┌', '┐', '┘', '┴', '├', '┬', '┤', '┼'];
+pub const DOUBLE_PIPE: Pipe = ['║', '═', '╚', '╔', '╗', '╝', '╩', '╠', '╦', '╣', '╬'];
+pub const DASHED_SINGLE_PIPE: Pipe = ['|', '-', '└', '┌', '┐', '┘', '┴', '├', '┬', '┤', '+'];
 
 pub const PIPE_UD: usize = 0;
 pub const PIPE_LR: usize = 1;
@@ -508,16 +509,20 @@ impl Cell {
         Self{chr, fg, bg}
     }
 
-    pub fn black() -> Self {
-        Self{
+    pub fn solid(colour: Colour) -> Self {
+        return Self {
             chr: ' ',
-            fg: WHITE,
-            bg: BLACK
+            fg: BLACK,
+            bg: colour
         }
     }
 
+    pub fn black() -> Self {
+        Self::solid(BLACK)
+    }
+
     pub fn transparent() -> Self {
-        Self{
+        Self {
             chr: TRANSPARENT_CHAR,
             fg: TRANSPARENT,
             bg: TRANSPARENT

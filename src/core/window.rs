@@ -7,8 +7,8 @@ use glium::Surface;
 const CELL_WIDTH: u32 = 8;
 const CELL_HEIGHT: u32 = 8;
 
-const VERTEX_SHADER: &str = include_str!("shaders/vertex.glsl");
-const FRAGMENT_SHADER: &str = include_str!("shaders/frag.glsl");
+const VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
+const FRAGMENT_SHADER: &str = include_str!("../shaders/frag.glsl");
 
 #[derive(Copy, Clone)]
 struct Vertex {
@@ -18,7 +18,7 @@ implement_vertex!(Vertex, position);
 
 pub fn load_code_page() -> [u32; 512] {
 
-    let img = image::load(std::io::Cursor::new(&include_bytes!("codepage.png")), image::ImageFormat::Png).unwrap().to_rgb8();
+    let img = image::load(std::io::Cursor::new(&include_bytes!("../codepage.png")), image::ImageFormat::Png).unwrap().to_rgb8();
 
     let mut data = [0; 512];
 
@@ -41,9 +41,9 @@ pub fn load_code_page() -> [u32; 512] {
 }
 
 pub trait State {
-    fn handle_event(&mut self, event: Event, context: &FrameContext) {}
-    fn tick(&mut self, context: &FrameContext) {}
-    fn draw(&mut self, context: &FrameContext, surface: &mut ScreenSurface) {}
+    fn handle_event(&mut self, _event: Event, _context: &FrameContext) {}
+    fn tick(&mut self, _context: &FrameContext) {}
+    fn draw(&mut self, _context: &FrameContext, _surface: &mut ScreenSurface) {}
     fn close(&mut self) {}
 }
 
